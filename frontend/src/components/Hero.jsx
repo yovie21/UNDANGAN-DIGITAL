@@ -68,7 +68,7 @@ export default function Hero({ onOpen, isOpened }) {
         <div className="hero-frame-container">
           <div className="hero-frame-circle">
             <img
-              src="/src/assets/images/12.jpg"
+              src="/src/assets/images/1.jpg"
               alt="Yovie & Ajeng"
               className="hero-img"
             />

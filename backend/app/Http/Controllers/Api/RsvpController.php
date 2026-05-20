@@ -18,7 +18,8 @@ class RsvpController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'kehadiran' => 'required|in:hadir,tidak,belum',
-            'pesan' => 'nullable|string'
+            'pesan' => 'nullable|string',
+            'keterangan' => 'nullable|string|max:255',
         ]);
 
         $rsvp = Rsvp::create($validated);
@@ -32,7 +33,7 @@ class RsvpController extends Controller
     public function destroy($id)
     {
         $rsvp = Rsvp::find($id);
-        
+
         if (!$rsvp) {
             return response()->json(['message' => 'RSVP tidak ditemukan'], 404);
         }

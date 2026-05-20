@@ -1,15 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
+/* =========================================================
+   SCROLL REVEAL
+========================================================= */
+
+function useScrollReveal(selector = "[data-reveal]", threshold = 0.15) {
+  useEffect(() => {
+    const els = document.querySelectorAll(selector);
+
+    if (!els.length) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("in-view");
+          } else {
+            /* RESET */
+            e.target.classList.remove("in-view");
+          }
+        });
+      },
+      { threshold },
+    );
+
+    els.forEach((el) => io.observe(el));
+
+    return () => io.disconnect();
+  }, [selector, threshold]);
+}
 
 export default function Timeline() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
-
+  useScrollReveal();
   const events = [
     {
       time: "07:00 WIB",
       title: "Akad Nikah",
       description:
         "Prosesi akad nikah dilaksanakan dengan penuh khidmat, diawali pembacaan ayat suci Al-Qur’an, khutbah nikah, ijab kabul, serta doa bersama sebagai awal perjalanan baru kedua mempelai.",
-      icon: "👥",
+      icon: "💍",
       color: "#ec4899",
     },
     {
@@ -17,7 +47,7 @@ export default function Timeline() {
       title: "Kedatangan Tamu Undangan",
       description:
         "Para tamu undangan mulai hadir dan disambut hangat oleh keluarga serta alunan live music dan hidangan welcome drink yang telah disediakan.",
-      icon: "💍",
+      icon: "👥",
       color: "#d4a373",
     },
     {
@@ -56,7 +86,11 @@ export default function Timeline() {
             {events.map((event, index) => (
               <div
                 key={index}
-                className={`timeline-item ${index % 2 === 0 ? "timeline-left" : "timeline-right"}`}
+                className={`
+timeline-item
+${index % 2 === 0 ? "timeline-left reveal-left" : "timeline-right reveal-right"}
+`}
+                data-reveal
                 data-aos={index % 2 === 0 ? "fade-right" : "fade-left"}
                 data-aos-delay={index * 150}
                 onMouseEnter={() => setHoveredIndex(index)}

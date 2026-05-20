@@ -9,7 +9,7 @@ export default function VenueMap() {
     mapsUrl: "https://maps.app.goo.gl/5ceCdM9R5fey9ff96",
     // Embed URL yang benar dari Google Maps
     embedUrl:
-      "https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3956.57244502744!2d110.53134507318745!3d-7.401708672877537!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zN8KwMjQnMDYuMiJTIDExMMKwMzInMDIuMSJF!5e0!3m2!1sid!2sid!4v1769456667380!5m2!1sid!2sid",
+      "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d989.1431923815825!2d110.5337338!3d-7.4016725!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a709767b69e39%3A0x519764565b577497!2sHGXM%2B7MR%2C%20Banjari%2C%20Cukil%2C%20Kec.%20Tengaran%2C%20Kabupaten%20Semarang%2C%20Jawa%20Tengah%2050775!5e0!3m2!1sid!2sid!4v1779288650554!5m2!1sid!2sid",
   };
 
   return (

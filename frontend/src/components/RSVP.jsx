@@ -1,187 +1,274 @@
-import React, { useState } from 'react';
-import { createRsvp } from '../services/api';
+import React, { useState, useEffect } from "react";
+
+import { createRsvp } from "../services/api";
+
+/* =========================================================
+   SCROLL REVEAL
+========================================================= */
+
+function useScrollReveal(selector = "[data-reveal]", threshold = 0.15) {
+  useEffect(() => {
+    const els = document.querySelectorAll(selector);
+
+    if (!els.length) return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("in-view");
+          } else {
+            e.target.classList.remove("in-view");
+          }
+        });
+      },
+      { threshold },
+    );
+
+    els.forEach((el) => io.observe(el));
+
+    return () => io.disconnect();
+  }, [selector, threshold]);
+}
+
+/* =========================================================
+   BOTANICAL
+========================================================= */
+
+const BotanicalCorner = () => (
+  <svg viewBox="0 0 150 150" fill="none">
+    <path
+      d="M135 8 Q110 45 75 65 Q48 80 8 75"
+      stroke="#3d6450"
+      strokeWidth="1.2"
+      fill="none"
+    />
+
+    <ellipse
+      cx="80"
+      cy="50"
+      rx="10"
+      ry="5"
+      fill="#4a7a5e"
+      opacity="0.5"
+      transform="rotate(-35 80 50)"
+    />
+  </svg>
+);
+
+/* =========================================================
+   COMPONENT
+========================================================= */
 
 export default function RSVP({ onSubmit }) {
-    const [formData, setFormData] = useState({
-        nama: '',
-        kehadiran: '', // ✅ Empty string, bukan 'Pilih Status'
-        pesan: ''
+  useScrollReveal();
+
+  const [formData, setFormData] = useState({
+    nama: "",
+    kehadiran: "",
+    pesan: "",
+  });
+
+  const [submitted, setSubmitted] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+
+  const [error, setError] = useState("");
+
+  /* =========================================================
+     HANDLE CHANGE
+  ========================================================= */
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: value,
     });
 
-    const [submitted, setSubmitted] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    if (error) setError("");
+  };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-        // Clear error when user starts typing
-        if (error) setError('');
-    };
+  /* =========================================================
+     HANDLE SUBMIT
+  ========================================================= */
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        // Validasi input
-        if (!formData.nama.trim()) {
-            setError('Mohon isi nama Anda!');
-            return;
-        }
+    setError("");
 
-        if (!formData.kehadiran || formData.kehadiran === '') {
-            setError('Mohon pilih status kehadiran!');
-            return;
-        }
+    if (!formData.nama.trim()) {
+      setError("Mohon isi nama Anda!");
+      return;
+    }
 
-        setLoading(true);
+    if (!formData.kehadiran) {
+      setError("Mohon pilih status kehadiran!");
+      return;
+    }
 
-        try {
-            // ✅ Data yang dikirim ke API (sesuai backend Laravel)
-            const dataToSend = {
-                nama: formData.nama.trim(),
-                kehadiran: formData.kehadiran, // ✅ 'hadir', 'tidak', atau 'belum'
-                pesan: formData.pesan.trim()
-            };
+    setLoading(true);
 
-            console.log('📤 Mengirim data:', dataToSend);
+    try {
+      const dataToSend = {
+        nama: formData.nama.trim(),
+        kehadiran: formData.kehadiran,
+        pesan: formData.pesan.trim(),
+        keterangan: "Resepsi",
+      };
 
-            // Kirim data ke API
-            const response = await createRsvp(dataToSend);
+      await createRsvp(dataToSend);
 
-            console.log('✅ Response dari API:', response.data);
+      if (onSubmit) {
+        onSubmit(dataToSend);
+      }
 
-            // Kirim data ke parent component untuk local update
-            if (onSubmit) {
-                onSubmit({
-                    nama: dataToSend.nama,
-                    kehadiran: dataToSend.kehadiran,
-                    pesan: dataToSend.pesan
-                });
-            }
+      setFormData({
+        nama: "",
+        kehadiran: "",
+        pesan: "",
+      });
 
-            // Reset form
-            setFormData({
-                nama: '',
-                kehadiran: '',
-                pesan: ''
-            });
+      setSubmitted(true);
 
-            setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 3000);
+    } catch (err) {
+      console.error(err);
 
-            // Tampilkan pesan sukses selama 3 detik
-            setTimeout(() => {
-                setSubmitted(false);
-            }, 3000);
+      setError("Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        } catch (err) {
-            console.error('❌ Error saat menyimpan RSVP:', err);
-            console.error('❌ Error response:', err.response?.data);
-            
-            // Handle different error types
-            if (err.response) {
-                // Server responded with error status
-                const errorData = err.response.data;
-                
-                // Jika ada validation errors
-                if (errorData.errors) {
-                    const errorMessages = Object.values(errorData.errors).flat().join(', ');
-                    setError(errorMessages);
-                } else {
-                    const errorMessage = errorData.message || 
-                                       `Error ${err.response.status}: ${err.response.statusText}`;
-                    setError(errorMessage);
-                }
-            } else if (err.request) {
-                // Request was made but no response
-                setError('Tidak dapat terhubung ke server. Periksa koneksi internet Anda.');
-            } else {
-                // Something else happened
-                setError('Terjadi kesalahan. Silakan coba lagi.');
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
+  return (
+    <section className="rsvp-section" id="rsvp">
+      {/* BOTANICAL */}
 
-    return (
-        <div className="rsvp-section">
-            <div className="section-header">
-                <span className="subtitle">Konfirmasi Kehadiran</span>
-                <h2>RSVP</h2>
-            </div>
+      <div className="botanical-corner botanical-corner--tr">
+        <BotanicalCorner />
+      </div>
 
-            <div className="rsvp-container">
-                {submitted && (
-                    <div className="success-message" data-aos="fade-in">
-                        ✓ Terima kasih! Konfirmasi Anda telah tersimpan.
-                    </div>
-                )}
+      <div className="botanical-corner botanical-corner--bl">
+        <BotanicalCorner />
+      </div>
 
-                {error && (
-                    <div className="error-message" data-aos="fade-in">
-                        ✗ {error}
-                    </div>
-                )}
+      {/* HEADER */}
 
-                <form onSubmit={handleSubmit} className="rsvp-form">
-                    <div className="form-group">
-                        <label htmlFor="nama">Nama Lengkap *</label>
-                        <input
-                            type="text"
-                            id="nama"
-                            name="nama"
-                            value={formData.nama}
-                            onChange={handleChange}
-                            placeholder="Masukkan nama Anda"
-                            required
-                            disabled={loading}
-                        />
-                    </div>
+      <div className="section-header reveal reveal-delay-1" data-reveal>
+        <p className="section-tag">Confirmation</p>
 
-                    <div className="form-group">
-                        <label htmlFor="kehadiran">Kehadiran *</label>
-                        <select
-                            id="kehadiran"
-                            name="kehadiran"
-                            value={formData.kehadiran}
-                            onChange={handleChange}
-                            required
-                            disabled={loading}
-                        >
-                            {/* ✅ Value sesuai backend: 'hadir', 'tidak', 'belum' */}
-                            <option value="">Pilih Status</option>
-                            <option value="hadir">✓ Akan Hadir</option>
-                            <option value="tidak">✗ Tidak Hadir</option>
-                            <option value="belum">? Belum Tahu</option>
-                        </select>
-                    </div>
+        {/* ornament */}
 
-                    <div className="form-group">
-                        <label htmlFor="pesan">Pesan (Opsional)</label>
-                        <textarea
-                            id="pesan"
-                            name="pesan"
-                            value={formData.pesan}
-                            onChange={handleChange}
-                            placeholder="Sampaikan pesan atau ucapan Anda..."
-                            rows="4"
-                            disabled={loading}
-                        ></textarea>
-                    </div>
+        <div className="header-ornament">
+          <span className="orn-line" />
 
-                    <button 
-                        type="submit" 
-                        className="btn-primary"
-                        disabled={loading}
-                    >
-                        {loading ? '⏳ Menyimpan...' : '✓ Kirim Konfirmasi'}
-                    </button>
-                </form>
-            </div>
+          <span className="orn-diamond" />
+
+          <span className="orn-line orn-line--reverse" />
         </div>
-    );
+
+        <h2 className="section-title">RSVP</h2>
+
+        <p className="section-subtitle">
+          Konfirmasi kehadiran Anda
+          <br />
+          untuk hari bahagia kami
+        </p>
+      </div>
+
+      {/* CONTAINER */}
+
+      <div className="rsvp-container reveal-scale" data-reveal>
+        {/* SUCCESS */}
+
+        {submitted && (
+          <div className="success-message">
+            ✓ Terima kasih! Konfirmasi Anda telah tersimpan.
+          </div>
+        )}
+
+        {/* ERROR */}
+
+        {error && <div className="error-message">✗ {error}</div>}
+
+        {/* FORM */}
+
+        <form onSubmit={handleSubmit} className="rsvp-form">
+          {/* NAME */}
+
+          <div className="form-group">
+            <label htmlFor="nama">Nama Lengkap</label>
+
+            <input
+              type="text"
+              id="nama"
+              name="nama"
+              value={formData.nama}
+              onChange={handleChange}
+              placeholder="Masukkan nama Anda"
+              disabled={loading}
+            />
+          </div>
+
+          {/* STATUS */}
+
+          <div className="form-group">
+            <label htmlFor="kehadiran">Kehadiran</label>
+
+            <select
+              id="kehadiran"
+              name="kehadiran"
+              value={formData.kehadiran}
+              onChange={handleChange}
+              disabled={loading}>
+              <option value="">Pilih Status</option>
+
+              <option value="hadir">✓ Akan Hadir</option>
+
+              <option value="tidak">✗ Tidak Hadir</option>
+
+              <option value="belum">? Belum Tahu</option>
+            </select>
+          </div>
+
+          {/* MESSAGE */}
+
+          <div className="form-group">
+            <label htmlFor="pesan">Pesan & Ucapan</label>
+
+            <textarea
+              id="pesan"
+              name="pesan"
+              rows="4"
+              value={formData.pesan}
+              onChange={handleChange}
+              placeholder="Tuliskan doa dan ucapan..."
+              disabled={loading}
+            />
+          </div>
+
+          {/* BUTTON */}
+
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? "⏳ Menyimpan..." : "✓ Kirim Konfirmasi"}
+          </button>
+        </form>
+      </div>
+
+      {/* DOT */}
+
+      <div className="dot-row reveal reveal-delay-4" data-reveal>
+        <span />
+
+        <span />
+
+        <span />
+      </div>
+    </section>
+  );
 }

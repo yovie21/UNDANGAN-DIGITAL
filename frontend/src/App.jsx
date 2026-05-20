@@ -8,7 +8,7 @@ import "aos/dist/aos.css";
 import "./styles/App.css";
 
 // Import Images
-import weddingImg from "./assets/images/wedding-couple.jpg";
+import weddingImg from "./assets/images/6.jpg";
 
 // Import Audio - Janji Suci (Yovie & Nuno)
 import backgroundMusic from "./assets/audio/lagu.mp3";
@@ -28,6 +28,20 @@ import Countdown from "./components/Countdown";
 import AdminPage from "./pages/AdminPage";
 import Timeline from "./components/Timeline";
 import WeddingGift from "./components/WeddingGift";
+
+import HeroN from "./componentsngunduh/Hero";
+import VerseN from "./componentsngunduh/Verse";
+import GroomBrideN from "./componentsngunduh/GroomBride";
+import OurWeddingN from "./componentsngunduh/OurWedding";
+import DetailsN from "./componentsngunduh/Details";
+import VenueMapN from "./componentsngunduh/VenueMap";
+import StoryN from "./componentsngunduh/Story";
+import GalleryN from "./componentsngunduh/Gallery";
+import RSVPN from "./componentsngunduh/RSVP";
+import RSVPListN from "./componentsngunduh/RSVPList";
+import CountdownN from "./componentsngunduh/Countdown";
+import TimelineN from "./componentsngunduh/Timeline";
+import WeddingGiftN from "./componentsngunduh/WeddingGift";
 
 function App() {
   const [isOpened, setIsOpened] = useState(false);
@@ -140,7 +154,7 @@ function App() {
     <Router>
       <Routes>
         <Route
-          path="/"
+          path="/resepsi"
           element={
             <div className={`App ${!isOpened ? "no-scroll" : ""}`}>
               <Hero onOpen={handleOpenInvitation} isOpened={isOpened} />
@@ -294,6 +308,168 @@ function App() {
                     Yovie & Ajeng
                   </h3>
                   <p className="wedding-date-footer">14 . 06 . 2026</p>
+                  <hr className="footer-line" />
+                  <p className="copyright">© 2026 Created with Love</p>
+                </footer>
+              </main>
+            </div>
+          }
+        />
+        <Route
+          path="/ngunduh-mantu"
+          element={
+            <div className={`App ${!isOpened ? "no-scroll" : ""}`}>
+              <HeroN onOpen={handleOpenInvitation} isOpened={isOpened} />
+
+              {/* Floating Music Control */}
+              {isOpened && (
+                <button
+                  className={`music-control ${isPlaying ? "rotating" : ""}`}
+                  onClick={toggleMusic}
+                  title={isPlaying ? "Pause Music" : "Play Music"}>
+                  {isPlaying ? "🎵" : "🔇"}
+                </button>
+              )}
+
+              <main
+                className={`main-content ${isOpened ? "content-reveal" : "content-hidden"}`}>
+                {/* Navigation Bar - UPDATED */}
+                <nav className="navbar">
+                  <button
+                    className={activeTab === "home" ? "active" : ""}
+                    onClick={() => scrollTo("home")}>
+                    Beranda
+                  </button>
+
+                  <button
+                    className={activeTab === "mempelai" ? "active" : ""}
+                    onClick={() => scrollTo("mempelai")}>
+                    Mempelai
+                  </button>
+
+                  <button
+                    className={activeTab === "timeline" ? "active" : ""}
+                    onClick={() => scrollTo("timeline")}>
+                    Acara
+                  </button>
+
+                  <button
+                    className={activeTab === "gallery" ? "active" : ""}
+                    onClick={() => scrollTo("gallery")}>
+                    Galeri
+                  </button>
+
+                  <button
+                    className={activeTab === "rsvp" ? "active" : ""}
+                    onClick={() => scrollTo("rsvp")}>
+                    RSVP
+                  </button>
+                </nav>
+
+                {/* Hero Section with Wedding Photo & Countdown */}
+                <div id="home" className="home-hero-container">
+                  <div
+                    className="home-hero-bg"
+                    style={{ backgroundImage: `url(${weddingImg})` }}>
+                    <div className="home-overlay"></div>
+                  </div>
+
+                  <div className="home-content-wrapper">
+                    <div data-aos="fade-up" data-aos-duration="1500">
+                      <CountdownN targetDate="2026-06-21T09:00:00" />
+                    </div>
+
+                    <div
+                      className="scroll-indicator"
+                      data-aos="fade-up"
+                      data-aos-delay="800">
+                      <span>Scroll ke Bawah</span>
+                      <div className="mouse"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Our Wedding Section - Introduction */}
+                <section
+                  id="our-wedding"
+                  className="section"
+                  data-aos="fade-up">
+                  <OurWeddingN />
+                </section>
+
+                {/* Bride & Groom Section */}
+                <section id="mempelai" className="section" data-aos="fade-up">
+                  <GroomBrideN />
+                </section>
+
+                {/* Quranic Verse Section - Before Event Details */}
+                <section
+                  id="verse"
+                  className="section verse-section"
+                  data-aos="fade-up">
+                  <VerseN />
+                </section>
+
+                {/* ========== TAMBAHAN BARU: TIMELINE ========== */}
+                <section id="timeline" className="section" data-aos="fade-up">
+                  <TimelineN />
+                </section>
+
+                {/* Event Details Section */}
+                <section id="details" className="section" data-aos="fade-up">
+                  <DetailsN />
+                </section>
+
+                {/* Venue Map Section */}
+                <section id="venue" className="section" data-aos="fade-up">
+                  <VenueMapN />
+                </section>
+
+                {/* Love Story Section */}
+                <section id="story" className="section" data-aos="fade-up">
+                  <StoryN />
+                </section>
+
+                {/* Gallery Section */}
+                <section id="gallery" className="section" data-aos="zoom-in">
+                  <GalleryN />
+                </section>
+
+                {/* RSVP Section */}
+                <section id="rsvp" className="section" data-aos="fade-up">
+                  <RSVPN onSubmit={handleRSVPSubmit} />
+                </section>
+
+                {/* RSVP List / Confirmation Results */}
+                {!loadingRsvp && rsvpData.length > 0 && (
+                  <section
+                    id="rsvp-list"
+                    className="section"
+                    data-aos="fade-up">
+                    <RSVPListN data={rsvpData} />
+                  </section>
+                )}
+
+                {/* Loading indicator */}
+                {loadingRsvp && (
+                  <section
+                    className="section"
+                    style={{ textAlign: "center", padding: "40px 20px" }}>
+                    <p style={{ color: "#999" }}>Memuat data tamu...</p>
+                  </section>
+                )}
+                <section id="gift" className="section" data-aos="fade-up">
+                  <WeddingGiftN />
+                </section>
+
+                {/* Footer */}
+                <footer className="main-footer">
+                  <h3
+                    className="font-aesthetic main-names-footer"
+                    data-aos="fade-up">
+                    Yovie & Ajeng
+                  </h3>
+                  <p className="wedding-date-footer">21 . 06 . 2026</p>
                   <hr className="footer-line" />
                   <p className="copyright">© 2026 Created with Love</p>
                 </footer>
